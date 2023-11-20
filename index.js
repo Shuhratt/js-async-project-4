@@ -5,17 +5,16 @@ import process from 'process';
 
 const program = new Command();
 
-program.name('page-loader').version('0.0.1');
-
 program
-  .option('-v, --version', 'output the version number')
-  .option(
-    '-o, --output [dir] <url>',
-    'output dir (default: "/home/user/current-dir")',
-    'home/user/current-dir',
-  )
-  .option('-h, --help', 'display help for command');
-
-//program.name('open').action((str, option) => {});
+  .name('page-loader')
+  .version('0.0.1')
+  .argument('<url>')
+  .option('-o, --output [dir]', 'output dir', 'home/user/current-dir')
+  .action((url, options) => {
+    console.log(options.output);
+    console.log(url)
+  });
 
 program.parse();
+
+const options = program.opts();
