@@ -1,0 +1,28 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "[![Actions Status](https://github.com/Shuhratt/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Shuhratt/js-async-project-4/actions)",
+  "main": "index.js",
+  "scripts": {
+    "page-loader": "node ./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shuhratt/js-async-project-4.git"
+  },
+  "author": "Shuhrat",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Shuhratt/js-async-project-4/issues"
+  },
+  "homepage": "https://github.com/Shuhratt/js-async-project-4#readme",
+  "devDependencies": {
+    "@types/commander": "^2.12.2",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0"
+  }
+}
