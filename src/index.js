@@ -5,6 +5,7 @@ import https from 'https';
 import { Command } from 'commander';
 import { writeFile } from 'fs/promises';
 import fs from 'fs';
+import formatHtml from './utils/formatHtml.js';
 
 const program = new Command();
 const regex = /[^a-zA-Z0-9]/g;
@@ -26,8 +27,6 @@ program
     const { host, pathname } = new URL(url);
     const linkOutput = `${host}${pathname}`;
     const nameFileFormat = formatingLink(linkOutput);
-    const hostFormat = formatingLink(host);
-    // ru-hexlet-io-courses_files   - pathFull + _file
 
     const isDefaultPath = output === process.cwd();
     const pathFull = `${!isDefaultPath ? `${output}` : process.cwd()}`;
@@ -38,7 +37,8 @@ program
       if (!fs.existsSync(output)) {
         fs.mkdirSync(output, { recursive: true }); // создаем папку, при recursive=true возращает первый созданный путь к каталогу.
       }
-      await writeFile(formatFullName, data);
+      const html = formatHtml(url, data);
+      await writeFile(formatFullName, html); // создание html cтраницы c корректными ресурсами
       console.info(`Файл успешно создан в ${pathFull}`);
     } catch (err) {
       throw err;
