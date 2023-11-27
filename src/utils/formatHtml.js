@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { load } from 'cheerio';
-import formatLink from './formatLink.js';
-import { writeFile } from 'fs/promises';
 import fs from 'fs';
 import https from 'https';
+import formatLink from './formatLink.js';
 
 const axiosInstance = axios.create({
   responseType: 'stream',
@@ -16,12 +15,15 @@ const formatHtml = (pageUrl, html) => {
   if (!pageUrl) throw new Error('Не указан url');
   if (!html) throw new Error('Не указан html');
 
-  const { host, pathname, origin } = new URL(pageUrl);
-  const nameStart = formatLink(`${host}${pathname}`);
+  const base = new URL('/', pageUrl).origin; // базовый url
+  const { host, pathname } = new URL(pageUrl, base); // 
 
-  if (!fs.existsSync(`${nameStart}_files`)) {
+  const nameStartDirectory = formatLink(`${host}${pathname}`);
+  const nameStartFile = formatLink(`${host}`);
+
+  if (!fs.existsSync(`${nameStartDirectory}_files`)) {
     // Cоздаём папку для картинок
-    fs.mkdirSync(`${nameStart}_files`, { recursive: true });
+    fs.mkdirSync(`${nameStartDirectory}_files`, { recursive: true });
   }
 
   const $ = load(html);
@@ -30,23 +32,19 @@ const formatHtml = (pageUrl, html) => {
       const src = $(el).attr('src');
       const alt = $(el).attr('alt');
       const [path, ext] = src.split('.');
+      const isRelativeLink = new URL(src, base).origin === base;
 
-      const nameDirectory = `${nameStart}_files/${nameStart}${formatLink(path)}`;
-      const fullNameDirectory = `${nameDirectory}.${ext}`;
+      if (isRelativeLink) {
+        const nameDirectory = `${nameStartDirectory}_files/${nameStartFile}${formatLink(path)}`;
+        const fullNameDirectory = `${nameDirectory}.${ext}`;
 
-      //пока что не работает с абсолютными ссылками
-      const typeUrlImage = src.includes('https') ? 'absolute' : 'relative';
-      const urlImage = {
-        // absolute: src,
-        relative: `${origin}${src}`,
-      };
+        const img = $(`<img src="/${fullNameDirectory}" alt="${alt}"/>`);
+        $(el).replaceWith(img);
 
-      const img = $(`<img src="/${fullNameDirectory}" alt="${alt}"/>`);
-      $(el).replaceWith(img);
-
-      const url = urlImage.relative;
-      const { data } = await axiosInstance.get(url);
-      await data.pipe(fs.createWriteStream(fullNameDirectory));
+        const url = new URL(src, base).toString();
+        const { data } = await axiosInstance.get(url); //скачивание картинок
+        await data.pipe(fs.createWriteStream(fullNameDirectory)); // загрузка картинок в папку
+      }
     } catch (error) {
       throw error;
     }
