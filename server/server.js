@@ -5,7 +5,7 @@ const app = express();
 const port = 3001;
 let server;
 
-app.use('/assets/professions', express.static('./server/static'));
+app.use('/assets', express.static('./server/static'));
 
 app.get('/courses', (req, res) => {
   res.sendFile(path.resolve('./__fixtures__/page-base-link.html'));

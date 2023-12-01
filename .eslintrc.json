@@ -4,20 +4,21 @@
         "es2021": true 
     },
     "extends": [ 
+        "eslint-plugin-import",
         "eslint:recommended",
-        "plugin:react/recommended",
         "prettier"
     ],
     "parser": "babel-eslint",
     "parserOptions": {
-        "ecmaVersion": 11, 
+        "ecmaVersion": 2018, 
         "sourceType": "module" 
     },
     "plugins": [
-        "react", 
+        "import",
         "prettier"
     ],
     "rules": {
-        "prettier/prettier": "error"
-    }
+        "prettier/prettier":"error",
+        "import/no-unresolved": "error"
+      }
 }

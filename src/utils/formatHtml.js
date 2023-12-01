@@ -1,53 +1,60 @@
-import axios from 'axios';
 import { load } from 'cheerio';
 import fs from 'fs';
-import https from 'https';
+import { writeFile } from 'fs/promises';
 import formatLink from './formatLink.js';
+import axiosInstance from './axiosInstance.js';
 
-const axiosInstance = axios.create({
-  responseType: 'stream',
-  httpsAgent: new https.Agent({
-    rejectUnauthorized: false,
-  }),
-});
+const nodes = ['img', 'script', 'link'];
+const typesAttrByNode = new Map([
+  [['img', 'script'], 'src'],
+  [['link'], 'href'],
+]);
 
 const formatHtml = (pageUrl, html) => {
   if (!pageUrl) throw new Error('Не указан url');
   if (!html) throw new Error('Не указан html');
 
-  const base = new URL('/', pageUrl).origin; // базовый url
-  const { host, pathname } = new URL(pageUrl, base); // 
+  const base = new URL('/', pageUrl).origin;
+  const { host, pathname } = new URL(pageUrl, base);
 
   const nameStartDirectory = formatLink(`${host}${pathname}`);
   const nameStartFile = formatLink(`${host}`);
 
   if (!fs.existsSync(`${nameStartDirectory}_files`)) {
-    // Cоздаём папку для картинок
+    // Cоздаём папку
     fs.mkdirSync(`${nameStartDirectory}_files`, { recursive: true });
   }
 
   const $ = load(html);
-  $('img').each(async (_, el) => {
-    try {
-      const src = $(el).attr('src');
-      const alt = $(el).attr('alt');
-      const [path, ext] = src.split('.');
-      const isRelativeLink = new URL(src, base).origin === base;
+  nodes.forEach((node) => {
+    $(node).each(async (_, el) => {
+      try {
+        let attrUrl;
+        typesAttrByNode.forEach((val, keys) => {
+          if (keys.includes(node)) {
+            attrUrl = val;
+            return;
+          }
+        });
+        const src = $(el).attr(attrUrl);
 
-      if (isRelativeLink) {
-        const nameDirectory = `${nameStartDirectory}_files/${nameStartFile}${formatLink(path)}`;
-        const fullNameDirectory = `${nameDirectory}.${ext}`;
+        const [path, ext] = src.split('.');
+        const isRelativeLink = new URL(src, base).origin === base;
 
-        const img = $(`<img src="/${fullNameDirectory}" alt="${alt}"/>`);
-        $(el).replaceWith(img);
+        if (isRelativeLink) {
+          const nameDirectory = `${nameStartDirectory}_files/${nameStartFile}${formatLink(path)}`;
+          const fullNameDirectory = `${nameDirectory}.${ext ?? 'html'}`;
 
-        const url = new URL(src, base).toString();
-        const { data } = await axiosInstance.get(url); //скачивание картинок
-        await data.pipe(fs.createWriteStream(fullNameDirectory)); // загрузка картинок в папку
+          $(el).attr(attrUrl, (_, src) => src.replace(src, fullNameDirectory));
+
+          const url = new URL(src, base).toString();
+          const { data } = await axiosInstance.get(url); //скачивание
+          await writeFile(fullNameDirectory, data); // загрузка
+        }
+      } catch (error) {
+        throw error;
       }
-    } catch (error) {
-      throw error;
-    }
+    });
   });
 
   return $.html();

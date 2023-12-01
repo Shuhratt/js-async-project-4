@@ -1,5 +1,3 @@
-const regex = /[^a-zA-Z0-9]/g;
-
-const formatLink = (text = '') => text.replaceAll(regex, '-');
+const formatLink = (text = '') => text.replaceAll(/[^a-zA-Z0-9]/g, '-');
 
 export default formatLink;

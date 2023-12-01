@@ -1,22 +1,15 @@
 #!/usr/bin/env node
 
-import axios from 'axios';
-import https from 'https';
 import { Command } from 'commander';
 import { writeFile } from 'fs/promises';
 import fs from 'fs';
 import formatHtml from './utils/formatHtml.js';
+import axiosInstance from './utils/axiosInstance.js';
 
 const program = new Command();
 const regex = /[^a-zA-Z0-9]/g;
 
 const formatingLink = (text) => text.replaceAll(regex, '-');
-
-const axiosInstance = axios.create({
-  httpsAgent: new https.Agent({
-    rejectUnauthorized: false,
-  }),
-});
 
 program
   .name('page-loader')
@@ -39,7 +32,6 @@ program
       }
       const html = formatHtml(url, data);
       await writeFile(formatFullName, html); // создание html cтраницы c корректными ресурсами
-      console.info(`Файл успешно создан в ${pathFull}`);
     } catch (err) {
       throw err;
     }
