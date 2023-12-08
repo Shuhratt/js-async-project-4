@@ -46,6 +46,6 @@ program
     }
   });
 
-program.parse();
+program.parse(process.argv);
 
 export { program };
