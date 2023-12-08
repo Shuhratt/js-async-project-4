@@ -23,7 +23,7 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    axiosDebug('Error:', error.status, error.message);
+    axiosDebug('Error:', JSON.stringify(error), error.message);
     return Promise.reject(error);
   },
 );
