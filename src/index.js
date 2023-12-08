@@ -18,6 +18,7 @@ program
   .option('-o, --output <dir>', 'output dir', process.cwd())
   .option('-c, --colors', 'colors')
   .option('-r, --runInBand')
+  .option('--bail')
   .action(async (url, { output }) => {
     const { host, pathname } = new URL(url);
     const linkOutput = `${host}${pathname}`;
