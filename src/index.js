@@ -9,7 +9,7 @@ import formatLink from './utils/formatLink.js';
 import createFolder from './utils/createFolder.js';
 import logger from './utils/logger.js';
 
-const program = new Command();
+export const program = new Command();
 
 program
   .name('page-loader')
@@ -43,5 +43,3 @@ program
     }
   })
   .parse();
-
-export default program;
