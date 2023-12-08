@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "description": "[![Actions Status](https://github.com/Shuhratt/js-async-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Shuhratt/js-async-project-4/actions)",
-  "main": "./src/index.js",
-  "bin": {
-    "page-loader": "./src/index.js"
-  },
   "scripts": {
     "test": "jest",
     "start": "node ./server/server.js"
