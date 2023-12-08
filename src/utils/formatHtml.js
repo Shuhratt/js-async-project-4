@@ -1,8 +1,9 @@
 import { load } from 'cheerio';
-import fs from 'fs';
 import { writeFile } from 'fs/promises';
 import formatLink from './formatLink.js';
+import createFolder from './createFolder.js';
 import axiosInstance from './axiosInstance.js';
+import logger from './logger.js';
 
 const nodes = ['img', 'script', 'link'];
 const typesAttrByNode = new Map([
@@ -20,10 +21,7 @@ const formatHtml = (pageUrl, html) => {
   const nameStartDirectory = formatLink(`${host}${pathname}`);
   const nameStartFile = formatLink(`${host}`);
 
-  if (!fs.existsSync(`${nameStartDirectory}_files`)) {
-    // Cоздаём папку
-    fs.mkdirSync(`${nameStartDirectory}_files`, { recursive: true });
-  }
+  createFolder(`${nameStartDirectory}_files`);
 
   const $ = load(html);
   nodes.forEach((node) => {
@@ -37,22 +35,33 @@ const formatHtml = (pageUrl, html) => {
           }
         });
         const src = $(el).attr(attrUrl);
-
         const [path, ext] = src.split('.');
         const isRelativeLink = new URL(src, base).origin === base;
 
         if (isRelativeLink) {
-          const nameDirectory = `${nameStartDirectory}_files/${nameStartFile}${formatLink(path)}`;
+          const nameFile = `${nameStartFile}${formatLink(path)}`;
+          const directoryName = `${nameStartDirectory}_files`;
+          const nameDirectory = `${directoryName}/${nameFile}`;
+
           const fullNameDirectory = `${nameDirectory}.${ext ?? 'html'}`;
 
           $(el).attr(attrUrl, (_, src) => src.replace(src, fullNameDirectory));
 
           const url = new URL(src, base).toString();
-          const { data } = await axiosInstance.get(url); //скачивание
-          await writeFile(fullNameDirectory, data); // загрузка
+          logger.info(`Запуск скачивания файла ${src}`);
+          const { data } = await axiosInstance.get(url);
+          logger.info(`Файл ${src} скачан`);
+          logger.info(`Запуск сохранения ${src} в ${directoryName}`);
+          await writeFile(fullNameDirectory, data);
+          logger.info(`Файл ${src} сохранён в ${directoryName}`);
         }
       } catch (error) {
-        throw error;
+        if (error.response) {
+          const { status, statusText } = error.response;
+          logger.error(`Error: ${status} ${statusText} ${error.config.url}`);
+        } else {
+          logger.error(`Error ${error.message}`);
+        }
       }
     });
   });
