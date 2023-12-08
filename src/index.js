@@ -41,8 +41,7 @@ program
       }
       throw error;
     }
-  });
-
-program.parse();
+  })
+  .parse();
 
 export default program;
