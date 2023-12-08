@@ -41,5 +41,6 @@ program
       }
       throw error;
     }
-  })
-  .parse();
+  });
+
+program.parse();
